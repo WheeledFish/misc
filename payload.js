@@ -122,5 +122,4 @@
   postNoCors(LOG_ENDPOINT, payload)});
 
   alert("it's working");
-
   
