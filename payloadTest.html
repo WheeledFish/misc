@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Тест JS из jsDelivr</title>
+</head>
+<body>
+  <h1>Тестовая страница</h1>
+  <p>Если скрипт работает, результат появится ниже:</p>
+  <div id="output"></div>
+
+  <!-- Подключаем JS из jsDelivr -->
+  <script src="https://cdn.jsdelivr.net/gh/WheeledFish/misc@main/payload.js"></script>
+
+  <!-- Твой тестовый код -->
+  <script>
+    // Проверяем, что библиотека подгрузилась
+    if (typeof _ !== "undefined") {
+      document.getElementById("output").textContent =
+        "Lodash подключён! Версия: " + _.VERSION;
+    } else {
+      document.getElementById("output").textContent =
+        "Скрипт не загрузился.";
+    }
+  </script>
+</body>
+</html>
