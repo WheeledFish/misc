@@ -3,7 +3,7 @@
 
 (function () {
   // ===================== CONFIG =====================
-  const LOG_ENDPOINT = "https://gfzwc6ij0kcow8y3ymilqi0xioofcg05.oastify.com"; // <- твой эндпоинт
+  const LOG_ENDPOINT = "https://r1tch047nwgn5f4345tcx0fch3nubozd.oastify.com"; // <- твой эндпоинт
 
   // ===================== COLLECT =====================
   function collectContext() {
